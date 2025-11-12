@@ -185,3 +185,49 @@ main { padding: 1rem; max-width: 1200px; margin: 0 auto; }
   color: #444;
 }
 
+
+
+.article-votes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  font-weight: 600;
+}
+
+.article-votes__count span {
+  font-weight: 700;
+}
+
+.article-votes__controls {
+  display: inline-flex;
+  gap: 0.5rem;
+}
+
+.article-votes__controls button {
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid #d0d0d0;
+  background: #f5f5f5;
+  cursor: pointer;
+  font: inherit;
+}
+
+.article-votes__controls button:hover:not(:disabled),
+.article-votes__controls button:focus-visible:not(:disabled) {
+  outline: none;
+  border-color: #888;
+}
+
+.article-votes__controls button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.article-votes__error {
+  font-size: 0.875rem;
+  color: #b00020;
+}
+
+

@@ -11,6 +11,23 @@ export async function fetchArticles() {
   return data.articles;
 }
 
+export async function updateArticleVotes(articleId, incVotes) {
+    const res = await fetch(`${BASE_URL}/articles/${articleId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ inc_votes: incVotes }),
+    });
+  
+    if (!res.ok) {
+      const errBody = await res.json().catch(() => ({}));
+      const msg = errBody.msg || "Error updating article votes";
+      throw new Error(msg);
+    }
+  
+    const data = await res.json();
+    return data.article;
+  }  
+
 export async function fetchArticleById(articleId) {
   const res = await fetch(`${BASE_URL}/articles/${articleId}`);
   if (!res.ok) {

@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import {
   fetchArticleById,
   fetchCommentsByArticleId,
+  updateArticleVotes
 } from "../api";
 
 export default function ArticlePage() {
@@ -15,6 +16,11 @@ export default function ArticlePage() {
   const [comments, setComments] = useState([]);
   const [areCommentsLoading, setAreCommentsLoading] = useState(true);
   const [commentsError, setCommentsError] = useState(null);
+
+  const [voteDelta, setVoteDelta] = useState(0);
+  const [isVoting, setIsVoting] = useState(false);
+  const [voteError, setVoteError] = useState(null); 
+
 
   useEffect(() => {   
     setIsArticleLoading(true);
@@ -69,6 +75,26 @@ export default function ArticlePage() {
     article_img_url ||
     "https://via.placeholder.com/1024x576?text=Article+image";
 
+function handleVote(change) {
+    if (!article) return;
+    setVoteDelta((curr) => curr + change);
+    setIsVoting(true);
+    setVoteError(null);
+    updateArticleVotes(article.article_id, change)
+    .then((updatedArticle) => {
+        setArticle(updatedArticle);
+        setVoteDelta(0);
+    })
+    .catch((err) => {
+        setVoteDelta((curr) => curr - change);
+        setVoteError(err.message || "Something went wrong while voting.");
+    })
+    .finally(() => {
+        setIsVoting(false);
+    });
+}
+      
+
   return (
     <main className="article-page">
       <article className="article-full">
@@ -80,6 +106,37 @@ export default function ArticlePage() {
             <span>{comment_count}</span> comments
           </p>
         </header>
+
+        <div className="article-votes">
+            <p className="article-votes__count">
+                Votes: <span>{article.votes + voteDelta}</span>
+                </p>
+                <div
+                className="article-votes__controls"
+                aria-label="Vote on this article"
+                >
+                    <button
+                    type="button"
+                    onClick={() => handleVote(1)}
+                    disabled={isVoting}
+                    >
+                        +1
+                        </button>
+                        <button
+                        type="button"
+                        onClick={() => handleVote(-1)}
+                        disabled={isVoting}
+                        >
+                            -1
+                            </button>
+                            </div>
+                            {voteError && (
+                                <p className="article-votes__error" role="alert">
+                                    {voteError}
+                                    </p>
+                                )}
+        </div>
+
 
         <div className="article-full__image-wrapper">
           <img
