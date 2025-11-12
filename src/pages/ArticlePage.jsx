@@ -1,39 +1,63 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { fetchArticleById } from "../api";
+import {
+  fetchArticleById,
+  fetchCommentsByArticleId,
+} from "../api";
 
 export default function ArticlePage() {
   const { article_id } = useParams();
-  const [article, setArticle] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [err, setErr] = useState(null);
 
-  useEffect(() => {
-    setIsLoading(true);
-    setErr(null);
+  const [article, setArticle] = useState(null);
+  const [isArticleLoading, setIsArticleLoading] = useState(true);
+  const [articleError, setArticleError] = useState(null);
+
+  const [comments, setComments] = useState([]);
+  const [areCommentsLoading, setAreCommentsLoading] = useState(true);
+  const [commentsError, setCommentsError] = useState(null);
+
+  useEffect(() => {   
+    setIsArticleLoading(true);
+    setArticleError(null);
 
     fetchArticleById(article_id)
       .then(setArticle)
-      .catch((e) => setErr(e.message || "Failed to load article"))
-      .finally(() => setIsLoading(false));
+      .catch((err) =>
+        setArticleError(err.message || "Failed to load article")
+      )
+      .finally(() => setIsArticleLoading(false));
+
+    setAreCommentsLoading(true);
+    setCommentsError(null);
+
+    fetchCommentsByArticleId(article_id)
+      .then(setComments)
+      .catch((err) =>
+        setCommentsError(err.message || "Failed to load comments")
+      )
+      .finally(() => setAreCommentsLoading(false));
   }, [article_id]);
 
-  if (isLoading) return <p role="status">Loading article…</p>;
-  if (err) return <p role="alert">Could not load article: {err}</p>;
-  if (!article) return <p role="alert">Article not found.</p>;
+  if (isArticleLoading) {
+    return <p role="status">Loading article…</p>;
+  }
+
+  if (articleError) {
+    return <p role="alert">Could not load article: {articleError}</p>;
+  }
 
   const {
     title,
     body,
-    author,
     topic,
+    author,
     votes,
     comment_count,
     created_at,
     article_img_url,
   } = article;
 
-  const date = new Date(created_at).toLocaleString(undefined, {
+  const displayDate = new Date(created_at).toLocaleString("en-GB", {
     year: "numeric",
     month: "short",
     day: "2-digit",
@@ -41,46 +65,98 @@ export default function ArticlePage() {
     minute: "2-digit",
   });
 
-  const imageUrl =
-    article_img_url || "https://via.placeholder.com/800x450?text=Article+image";
-
-  const paragraphs = body ? body.split("\n\n") : [];
+  const heroImg =
+    article_img_url ||
+    "https://via.placeholder.com/1024x576?text=Article+image";
 
   return (
     <main className="article-page">
-      <article className="article-page__article">
-        <header className="article-page__header">
-          <h1 className="article-page__title">{title}</h1>
-          <p className="article-page__meta">
-            <span className="article-page__meta-item">Topic: {topic}</span>
-            <span className="article-page__meta-item">By {author}</span>
-            <span className="article-page__meta-item">{date}</span>
-            <span className="article-page__meta-item">
-              {votes} {votes === 1 ? "vote" : "votes"}
-            </span>
-            <span className="article-page__meta-item">
-              {comment_count}{" "}
-              {comment_count === 1 ? "comment" : "comments"}
-            </span>
+      <article className="article-full">
+        <header className="article-full__header">
+          <h1 className="article-full__title">{title}</h1>
+          <p className="article-full__meta">
+            Topic: <span>{topic}</span> • By <span>{author}</span> •{" "}
+            <span>{displayDate}</span> • <span>{votes}</span> votes •{" "}
+            <span>{comment_count}</span> comments
           </p>
         </header>
 
-        <div className="article-page__image-wrapper">
+        <div className="article-full__image-wrapper">
           <img
-            src={imageUrl}
-            alt={`Image representing "${title}"`}
-            className="article-page__image"
+            src={heroImg}
+            alt={`Image representing ${title}`}
+            className="article-full__image"
+            loading="lazy"
           />
         </div>
 
-        <div className="article-page__body">
-          {paragraphs.length > 0 ? (
-            paragraphs.map((para, idx) => <p key={idx}>{para}</p>)
-          ) : (
-            <p>{body}</p>
-          )}
+        <div className="article-full__body">
+          <p>{body}</p>
         </div>
       </article>
+
+      {}
+      <section className="comments">
+        <h2 className="comments__title">
+          Comments ({comment_count})
+        </h2>
+
+        {areCommentsLoading && (
+          <p role="status">Loading comments…</p>
+        )}
+
+        {commentsError && (
+          <p role="alert">Could not load comments: {commentsError}</p>
+        )}
+
+        {!areCommentsLoading &&
+          !commentsError &&
+          comments.length === 0 && (
+            <p>No comments yet. Be the first to comment!</p>
+          )}
+
+        {!areCommentsLoading &&
+          !commentsError &&
+          comments.length > 0 && (
+            <ul className="comment-list" aria-live="polite">
+              {comments.map((c) => {
+                const commentDate = new Date(
+                  c.created_at
+                ).toLocaleString("en-GB", {
+                  year: "numeric",
+                  month: "short",
+                  day: "2-digit",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                });
+
+                return (
+                  <li
+                    key={c.comment_id}
+                    className="comment-card"
+                  >
+                    <header className="comment-card__header">
+                      <span className="comment-card__author">
+                        {c.author}
+                      </span>
+                      <span className="comment-card__date">
+                        {commentDate}
+                      </span>
+                    </header>
+
+                    <p className="comment-card__body">
+                      {c.body}
+                    </p>
+
+                    <p className="comment-card__votes">
+                      Votes: <span>{c.votes}</span>
+                    </p>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+      </section>
     </main>
   );
 }
