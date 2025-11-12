@@ -28,12 +28,13 @@ export default function ArticlesPage() {
         {articles.map((a) => (
           <li key={a.article_id}>
             <ArticleCard
+              articleId={a.article_id}
               title={a.title}
               author={a.author}
               topic={a.topic}
               votes={a.votes}
-              commentCount={a.comment_count}
               createdAt={a.created_at}
+              commentCount={a.comment_count}
               imageUrl={a.article_img_url}
             />
           </li>
