@@ -49,3 +49,20 @@ export async function fetchCommentsByArticleId(articleId) {
   const data = await res.json();
   return data.comments;
 }
+
+export async function postCommentByArticleId(articleId, username, body) {
+  const res = await fetch(`${BASE_URL}/articles/${articleId}/comments`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, body }),
+  });
+
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => ({}));
+    const message = errBody.msg || "Error posting comment";
+    throw new Error(message);
+  }
+
+  const data = await res.json();
+  return data.comment;
+}

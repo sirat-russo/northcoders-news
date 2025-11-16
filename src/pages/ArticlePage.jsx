@@ -3,8 +3,10 @@ import { useParams } from "react-router-dom";
 import {
   fetchArticleById,
   fetchCommentsByArticleId,
-  updateArticleVotes
+  updateArticleVotes,
+  postCommentByArticleId,
 } from "../api";
+
 
 export default function ArticlePage() {
   const { article_id } = useParams();
@@ -20,6 +22,10 @@ export default function ArticlePage() {
   const [voteDelta, setVoteDelta] = useState(0);
   const [isVoting, setIsVoting] = useState(false);
   const [voteError, setVoteError] = useState(null); 
+
+  const [newCommentBody, setNewCommentBody] = useState("");
+  const [isPostingComment, setIsPostingComment] = useState(false);
+  const [postCommentError, setPostCommentError] = useState(null);
 
 
   useEffect(() => {   
@@ -93,6 +99,46 @@ function handleVote(change) {
         setIsVoting(false);
     });
 }
+
+function handleCommentSubmit(event) {
+  event.preventDefault();
+
+  const trimmed = newCommentBody.trim();
+  if (!trimmed) {
+    setPostCommentError("Comment cannot be empty.");
+    return;
+  }
+
+  if (!article) return;
+
+  setIsPostingComment(true);
+  setPostCommentError(null);
+
+  const username = "tickle122"; 
+
+  postCommentByArticleId(article.article_id, username, trimmed)
+    .then((newComment) => {
+      setComments((current) => [newComment, ...current]);
+
+      setArticle((currentArticle) =>
+        currentArticle
+          ? {
+              ...currentArticle,
+              comment_count: currentArticle.comment_count + 1,
+            }
+          : currentArticle
+      );
+
+      setNewCommentBody("");
+    })
+    .catch((err) => {
+      setPostCommentError(err.message || "Failed to post comment.");
+    })
+    .finally(() => {
+      setIsPostingComment(false);
+    });
+}
+
       
 
   return (
@@ -157,6 +203,41 @@ function handleVote(change) {
         <h2 className="comments__title">
           Comments ({comment_count})
         </h2>
+
+        <form className="comment-form" onSubmit={handleCommentSubmit}>
+          <label htmlFor="new-comment">
+            Add a comment
+          </label>
+          <textarea
+            id="new-comment"
+            name="new-comment"
+            value={newCommentBody}
+            onChange={(event) => setNewCommentBody(event.target.value)}
+            placeholder="Share your thoughts about this article…"
+            disabled={isPostingComment}
+            required
+          />
+          <div className="comment-form__actions">
+            <button
+              type="submit"
+              disabled={isPostingComment || !newCommentBody.trim()}
+            >
+              {isPostingComment ? "Posting…" : "Post comment"}
+            </button>
+          </div>
+
+          {postCommentError && (
+            <p className="comment-form__error" role="alert">
+              {postCommentError}
+            </p>
+          )}
+
+          {isPostingComment && !postCommentError && (
+            <p className="comment-form__status" role="status">
+              Submitting your comment…
+            </p>
+          )}
+        </form>
 
         {areCommentsLoading && (
           <p role="status">Loading comments…</p>
