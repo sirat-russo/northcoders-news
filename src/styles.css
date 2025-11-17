@@ -281,3 +281,38 @@ main { padding: 1rem; max-width: 1200px; margin: 0 auto; }
   color: #555555;
 }
 
+.comment-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.comment-card__delete-btn {
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid #ef4444;
+  background: #fee2e2;
+  color: #b91c1c;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.comment-card__delete-btn:hover:not(:disabled),
+.comment-card__delete-btn:focus-visible:not(:disabled) {
+  outline: none;
+  background: #fecaca;
+}
+
+.comment-card__delete-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.comment-card__delete-error {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  color: #b00020;
+}
+

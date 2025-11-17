@@ -5,8 +5,10 @@ import {
   fetchCommentsByArticleId,
   updateArticleVotes,
   postCommentByArticleId,
+  deleteCommentById,
 } from "../api";
 
+const LOGGED_IN_USER = "tickle122";
 
 export default function ArticlePage() {
   const { article_id } = useParams();
@@ -26,6 +28,9 @@ export default function ArticlePage() {
   const [newCommentBody, setNewCommentBody] = useState("");
   const [isPostingComment, setIsPostingComment] = useState(false);
   const [postCommentError, setPostCommentError] = useState(null);
+
+  const [deletingCommentIds, setDeletingCommentIds] = useState([]);
+  const [deleteCommentError, setDeleteCommentError] = useState(null);
 
 
   useEffect(() => {   
@@ -139,7 +144,42 @@ function handleCommentSubmit(event) {
     });
 }
 
-      
+function handleDeleteComment(commentId) {
+  if (!article) return;
+
+  setDeleteCommentError(null);
+  setDeletingCommentIds((current) => [...current, commentId]);
+
+  deleteCommentById(commentId)
+    .then(() => {
+      setComments((current) =>
+        current.filter((comment) => comment.comment_id !== commentId)
+      );
+
+      setArticle((currentArticle) =>
+        currentArticle
+          ? {
+              ...currentArticle,
+              comment_count: Math.max(
+                0,
+                currentArticle.comment_count - 1
+              ),
+            }
+          : currentArticle
+      );
+    })
+    .catch((err) => {
+      setDeleteCommentError(
+        err.message || "Failed to delete comment."
+      );
+    })
+    .finally(() => {
+      setDeletingCommentIds((current) =>
+        current.filter((id) => id !== commentId)
+      );
+    });
+}
+
 
   return (
     <main className="article-page">
@@ -268,6 +308,9 @@ function handleCommentSubmit(event) {
                   minute: "2-digit",
                 });
 
+                const isOwnComment = c.author === LOGGED_IN_USER;
+                const isDeleting = deletingCommentIds.includes(c.comment_id);
+
                 return (
                   <li
                     key={c.comment_id}
@@ -286,14 +329,36 @@ function handleCommentSubmit(event) {
                       {c.body}
                     </p>
 
-                    <p className="comment-card__votes">
-                      Votes: <span>{c.votes}</span>
-                    </p>
+                    <div className="comment-card__footer">
+                      <p className="comment-card__votes">
+                        Votes: <span>{c.votes}</span>
+                      </p>
+
+                      {isOwnComment && (
+                        <button
+                          type="button"
+                          className="comment-card__delete-btn"
+                          onClick={() =>
+                            handleDeleteComment(c.comment_id)
+                          }
+                          disabled={isDeleting}
+                        >
+                          {isDeleting ? "Deleting…" : "Delete"}
+                        </button>
+                      )}
+                    </div>
                   </li>
                 );
               })}
+
             </ul>
           )}
+          {deleteCommentError && (
+            <p className="comment-card__delete-error" role="alert">
+              {deleteCommentError}
+              </p>
+            )}
+
       </section>
     </main>
   );
