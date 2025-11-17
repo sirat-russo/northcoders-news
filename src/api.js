@@ -1,11 +1,16 @@
 const BASE_URL = "https://sirats-nc-news-project.onrender.com/api";
 
-export async function fetchArticles(topic) {
-  let url = `${BASE_URL}/articles`;
+export async function fetchArticles(topic, sortBy, order) {
+  const params = new URLSearchParams();
 
-  if (topic) {
-    const encodedTopic = encodeURIComponent(topic);
-    url += `?topic=${encodedTopic}`;
+  if (topic) params.set("topic", topic);
+  if (sortBy) params.set("sort_by", sortBy);
+  if (order) params.set("order", order);
+
+  let url = `${BASE_URL}/articles`;
+  const queryString = params.toString();
+  if (queryString) {
+    url += `?${queryString}`;
   }
 
   const res = await fetch(url);

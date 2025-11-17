@@ -346,3 +346,26 @@ main { padding: 1rem; max-width: 1200px; margin: 0 auto; }
   border-color: #111827;
 }
 
+.articles-sort {
+  margin: 0 0 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.articles-sort label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.articles-sort select {
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid #d4d4d4;
+  background: #ffffff;
+  font: inherit;
+}
+
