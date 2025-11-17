@@ -1,7 +1,14 @@
 const BASE_URL = "https://sirats-nc-news-project.onrender.com/api";
 
-export async function fetchArticles() {
-  const res = await fetch(`${BASE_URL}/articles`);
+export async function fetchArticles(topic) {
+  let url = `${BASE_URL}/articles`;
+
+  if (topic) {
+    const encodedTopic = encodeURIComponent(topic);
+    url += `?topic=${encodedTopic}`;
+  }
+
+  const res = await fetch(url);
   if (!res.ok) {
     const errBody = await res.json().catch(() => ({}));
     const message = errBody.msg || "Error fetching articles";
@@ -10,6 +17,18 @@ export async function fetchArticles() {
   const data = await res.json();
   return data.articles;
 }
+
+export async function fetchTopics() {
+  const res = await fetch(`${BASE_URL}/topics`);
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => ({}));
+    const message = errBody.msg || "Error fetching topics";
+    throw new Error(message);
+  }
+  const data = await res.json();
+  return data.topics;
+}
+
 
 export async function updateArticleVotes(articleId, incVotes) {
     const res = await fetch(`${BASE_URL}/articles/${articleId}`, {

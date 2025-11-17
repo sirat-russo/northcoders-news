@@ -316,3 +316,33 @@ main { padding: 1rem; max-width: 1200px; margin: 0 auto; }
   color: #b00020;
 }
 
+.topics-nav {
+  margin: 0 0 1rem;
+}
+
+.topics-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.topics-link {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid #d4d4d4;
+  background: #f9fafb;
+  font-size: 0.9rem;
+  text-decoration: none;
+  color: #111827;
+}
+
+.topics-link--active {
+  background: #111827;
+  color: #ffffff;
+  border-color: #111827;
+}
+
